@@ -159,13 +159,20 @@ python mini_inference.py
 首先输入cmd指令，对原有bitsandbytes库进行卸载（如果有的话），我这里显示
 ![image](https://github.com/user-attachments/assets/3f78fd22-f5ca-444e-8cfb-8f03f4c9f6f1)
 说明我没有安装bitsandbytes库。所以第二步，安装预编译的Windows版bitsandbytes库,cmd指令
+
 pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.41.1-py3-none-win_amd64.whl
 ![image](https://github.com/user-attachments/assets/64e008c1-bab9-472d-950d-eb765aeaf052)
 安装成功！
+如果还是报错
+![image](https://github.com/user-attachments/assets/db81525a-2cfb-4b88-abdc-ea72a9f2f8d3)
+则根据提示升级
+
+pip install -U bitsandbytes
 
 3.安装必要的编译依赖
 pip install setuptools wheel ninja
 ![image](https://github.com/user-attachments/assets/018a25bb-324f-4218-8787-062932b4962a)
 如上，安装或更新了这个工具
+
 pip install accelerate
 ![image](https://github.com/user-attachments/assets/71e01935-0ca9-42d0-b1c4-bc05e55e4336)
