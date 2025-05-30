@@ -176,3 +176,14 @@ pip install setuptools wheel ninja
 
 pip install accelerate
 ![image](https://github.com/user-attachments/assets/71e01935-0ca9-42d0-b1c4-bc05e55e4336)
+
+4.若仍是出现报错，例如
+![image](https://github.com/user-attachments/assets/fae1fe0f-44db-41ae-8e75-134912bac3a1)
+则是因为bitsandbytes 0.46.0需要pytorch 2.7.0，但torchvision 0.16.0和torchaudio 2.1.0需要pytorch 2.1.0，它们冲突了
+根据提示，解决方法是安装所有的2.3.0对应版本
+
+| **torch** | 2.3.0 | 基础版本 |
+| **torchvision** | 0.18.0 | 专为PyTorch 2.3.x设计 |
+| **torchaudio** | 2.3.0 | 与PyTorch 2.3.x匹配 |
+| **bitsandbytes** | 0.43.0 | 兼容PyTorch 2.3.x |
+| **transformers** | 4.40.0 | 最新稳定版 |
