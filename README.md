@@ -12,16 +12,16 @@
 2.创建一个新的虚拟环境，这里因为要使用cpu部署，所以命名为了deepseek-cpu。使用cmd（命令提示符）进行创建，创建完成后可以发现"C:\Users\Lenovo"多了一个文件夹\deepseek-cpu
 
 运行该新的虚拟环境，cmd指令为
-
+'''bash
 deepseek-cpu\Scripts\activate
-
+'''
 成功进入后，cmd显示
 
-(deepseek-cpu) C:\Users\Lenovo>
+'(deepseek-cpu) C:\Users\Lenovo>'
 
 3.安装基础依赖，在新生成的cmd对话框中，输入
 
-pip install torch>=2.1.1 transformers>=4.35.0 accelerate sentencepiece
+'pip install torch>=2.1.1 transformers>=4.35.0 accelerate sentencepiece'
 
 这是使用pip工具安装pytorch，如果未安装pip或者版本过低，可以install --uograde pip
 
@@ -29,19 +29,19 @@ torch包很大，需要长时间的下载
 
 这一步可能会产生报错，但只要torch下载完成就不影响。比如在transformers处报错，可以在cmd执行
 
-pip install --uograde transformers
+'pip install --uograde transformers'
 
 某次尝试时这里没有报错，但后续步骤中会有提示“找不到transformers”，所以这里还是install一下transformers比较好
 
 4.为了实现GPU加速推理，继续cmd执行
 
-pip install vllm==0.3.0
+'pip install vllm==0.3.0'
 
 等待进度条跑完，可能第二个进度条会报错error，但只要第一个进度条跑完是done就可以
 
 5.为了实现CPU部署，继续cmd执行
 
-pip install llama-cpp-python
+'pip install llama-cpp-python'
 
 等待进度条跑完，上一步的进度条即使有报错wheel（轮子）没有构建成功，这一步的进度条也会把wheel构建完成（done）
 
@@ -50,14 +50,14 @@ pip install llama-cpp-python
 
 即使这时打开VPN，cmd也会报错
 
-InvalidSchema: missing dependencies for socks support
+'InvalidSchema: missing dependencies for socks support'
 
 解决方案一是安装缺少的socks依赖，但是会报错
 
-ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.
+'ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.'
 
 解决方案二是清除代理设置
-
+'''
 #Windows (CMD)
 set http_proxy=
 set https_proxy=
@@ -67,7 +67,7 @@ set ALL_PROXY=
 Remove-Item Env:http_proxy
 Remove-Item Env:https_proxy
 Remove-Item Env:ALL_PROXY
-
+'''
 但是我们不知道代理的具体信息，没法重新设置
 
 所以我开启了VPN后直接在hugging face 官网上下载，网址如下：
@@ -100,16 +100,12 @@ configuration_deepseek.py                # 构造配置文件
 # 四、调试模型
 
 # 1.编写推理文件mini_inference.py
-\'\'\' python
-#依赖
+'''python
+# 依赖
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-
 import torch
-
 #量化配置
-
 quant_config = BitsAndBytesConfig(
-
     load_in_4bit=True,
     
     bnb_4bit_quant_type="nf4",
