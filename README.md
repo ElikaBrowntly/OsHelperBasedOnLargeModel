@@ -334,3 +334,7 @@ while True:
     print(f"\n专家回答: {answer}")
 
 把模型加载的路径换成自己下载到的路径，然后cmd执行命令 python gguf_inference.py
+# 五、测试结果
+![测试结果1](https://github.com/user-attachments/assets/eed6907a-10ee-4f71-b9d8-828642e70525)
+![测试结果2](https://github.com/user-attachments/assets/447c59cc-3f4d-4aa4-a6e2-228dbaf15570)
+经过20s的模型加载，最终成功回答出了测试的问题
