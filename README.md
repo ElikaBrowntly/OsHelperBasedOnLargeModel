@@ -100,8 +100,8 @@ configuration_deepseek.py                # 构造配置文件
 # 四、调试模型
 
 # 1.编写推理文件mini_inference.py
-'''python
-
+\'\'\' python
+#依赖
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
 import torch
@@ -179,7 +179,7 @@ question = "解释Linux中的进程调度算法CFS"
 inputs = tokenizer(question, return_tensors="pt").to(model.device)
 outputs = model.generate(**inputs, max_new_tokens=256)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-'''
+\'\'\'
 
 # 2.在deepseek-cpu中运行
 
