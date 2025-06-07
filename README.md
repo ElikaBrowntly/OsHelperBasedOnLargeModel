@@ -6,58 +6,48 @@
 
 # 二、环境准备
 
-1.首先安装Python，deepseek 官方推荐的版本在Python 3.8及以上，但经过实测，后续一些步骤需要Python ≥ 3.9，所以保险起见这里安装了3.10版本。注意不能使用过于新的版本，比如Python 3.13，因为很多库还没有适配新的版本  
+# 1.安装Python
+deepseek 官方推荐的版本在Python 3.8及以上，但经过实测，后续一些步骤需要Python ≥ 3.9，所以保险起见这里安装了3.10版本。注意不能使用过于新的版本，比如Python 3.13，因为很多库还没有适配新的版本  
 安装完之后，把Python 3.10添加到环境变量中。（下一步会创建新的虚拟环境，所以也可以不添加，但为了方便以及后续的报错排查，这里还是选择添加了）  
-2.创建一个新的虚拟环境，这里因为要使用cpu部署，所以命名为了deepseek-cpu。使用cmd（命令提示符）进行创建，创建完成后可以发现"C:\Users\Lenovo"多了一个文件夹\deepseek-cpu  
+# 2.创建一个新的虚拟环境
+这里因为要使用cpu部署，所以命名为了deepseek-cpu。使用cmd（命令提示符）进行创建，创建完成后可以发现"C:\Users\Lenovo"多了一个文件夹\deepseek-cpu  
 运行该新的虚拟环境，cmd指令为
 ```cmd
 deepseek-cpu\Scripts\activate
 ```
-成功进入后，cmd显示
-
+成功进入后，cmd显示  
 `(deepseek-cpu) C:\Users\Lenovo>`
-
-3.安装基础依赖，在新生成的cmd对话框中，输入
-
-```bash
+# 3.安装基础依赖
+在新生成的cmd对话框中，输入
+```cmd
 pip install torch>=2.1.1 transformers>=4.35.0 accelerate sentencepiece
 ```   
 这是使用pip工具安装pytorch，如果未安装pip或者版本过低，可以
-`install --uograde pip`
-
-torch包很大，需要长时间的下载
-
+`install --uograde pip`  
+torch包很大，需要长时间的下载  
 这一步可能会产生报错，但只要torch下载完成就不影响。比如在transformers处报错，可以在cmd执行
-
 ```cmd
 pip install --uograde transformers
 ```
-
 某次尝试时这里没有报错，但后续步骤中会有提示“找不到transformers”，所以这里还是install一下transformers比较好
-
-4.为了实现GPU加速推理，继续cmd执行
-
+# 4.为了实现GPU加速推理
+继续在cmd执行
 ```cmd
 pip install vllm==0.3.0
 ```
 等待进度条跑完，可能第二个进度条会报错error，但只要第一个进度条跑完是done就可以
-
-5.为了实现CPU部署，继续cmd执行
-
-`pip install llama-cpp-python`
-
+# 5.为了实现CPU部署
+继续在cmd执行
+```cmd
+pip install llama-cpp-python`
+```
 等待进度条跑完，上一步的进度条即使有报错wheel（轮子）没有构建成功，这一步的进度条也会把wheel构建完成（done）
-
 # 三、下载模型
-一般采用hugging face下载比较多。虽然也可以继续通过cmd进行下载，但是有两个麻烦：一是要输入hf_打头的token，这个还是需要注册、登录hugging face并验证邮箱；二是国内无法访问，需要VPN
-
-即使这时打开VPN，cmd也会报错
-
-`InvalidSchema: missing dependencies for socks support`
-
-解决方案一是安装缺少的socks依赖，但是会报错
-`ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.`
-
+一般采用hugging face下载比较多。虽然也可以继续通过cmd进行下载，但是有两个麻烦：一是要输入hf_打头的token，这个还是需要注册、登录hugging face并验证邮箱；二是国内无法访问，需要VPN  
+即使这时打开VPN，cmd也会报错  
+`InvalidSchema: missing dependencies for socks support`  
+解决方案一是安装缺少的socks依赖，但是会报错  
+`ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.`  
 解决方案二是清除代理设置
 ```cmd
 #Windows (CMD)
