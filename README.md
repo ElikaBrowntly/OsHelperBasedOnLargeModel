@@ -82,10 +82,15 @@ https://huggingface.co/deepseek-ai/deepseek-moe-16b-chat/tree/main
 可以发现，因为模型很大，他分了7个分卷进行上传。我们为了轻量化，只需下载其中的
 
 pytorch_model-00001-of-00007.safetensors  # 主模型分片1
+
 pytorch_model-00002-of-00007.safetensors  # 主模型分片2
+
 tokenizer.json                           # 分词器配置
+
 config.json                              # 模型配置
+
 modeling_deepseek.py                     # 模型组装
+
 configuration_deepseek.py                # 构造配置文件
 
 即可。为什么可以省略其他文件？
