@@ -177,9 +177,9 @@ pip install accelerate
 则是因为bitsandbytes 0.46.0需要pytorch 2.7.0，但torchvision 0.16.0和torchaudio 2.1.0需要pytorch 2.1.0，它们冲突了
 根据提示，解决方法是把所有的包都统一到2.3.0对应版本
 
-依赖名称 | 版本 | 说明
- ---- \ ----- \ ------
- **torch** | 2.3.0 | 基础版本 
+依赖名称 | 版本 | 说明  
+ ---- | ----- | ------
+ **torch** | 2.3.0 | 基础版本  
  **torchvision** | 0.18.0 | 专为PyTorch 2.3.x设计 
  **torchaudio** | 2.3.0 | 与PyTorch 2.3.x匹配 
  **bitsandbytes** | 0.43.0 | 兼容PyTorch 2.3.x 
