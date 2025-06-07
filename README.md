@@ -1,16 +1,14 @@
 # 一、模型选择
 
-需要对操作系统领域进行“专家级”的知识问答与检索，首先考虑到了deepseek 的大模型，然而在本地部署需要追求轻量化，直接使用全精度模型，既占用磁盘和内存，又没有必要，因为我们只需要专精于操作系统领域。因此，一个选择是deepseek 的稀疏模型moe-16b。
-另一个选择则是，Microsoft 开源的phi-3-mini或phi-4-mini，可以很好的适应操作系统方面的需求。而且，所需的模型参数更少，且同样支持中英文。一个可能的缺点是，这些模型在中文模式下，准确性还未得到全面的验证。
+需要对操作系统领域进行“专家级”的知识问答与检索，首先考虑到了deepseek 的大模型，然而在本地部署需要追求轻量化，直接使用全精度模型，既占用磁盘和内存，又没有必要，因为我们只需要专精于操作系统领域。因此，一个选择是deepseek 的稀疏模型moe-16b。  
+另一个选择则是，Microsoft 开源的phi-3-mini或phi-4-mini，可以很好的适应操作系统方面的需求。而且，所需的模型参数更少，且同样支持中英文。一个可能的缺点是，这些模型在中文模式下，准确性还未得到全面的验证。  
 综合考虑后，先选择了deepseek 的稀疏模型进行部署，后续可能会增加其他模型。
 
 # 二、环境准备
 
-1.首先安装Python，deepseek 官方推荐的版本在Python 3.8及以上，但经过实测，后续一些步骤需要Python ≥ 3.9，所以保险起见这里安装了3.10版本。注意不能使用过于新的版本，比如Python 3.13，因为很多库还没有适配新的版本
-安装完之后，把Python 3.10添加到环境变量中。（下一步会创建新的虚拟环境，所以也可以不添加，但为了方便以及后续的报错排查，这里还是选择添加了）
-
-2.创建一个新的虚拟环境，这里因为要使用cpu部署，所以命名为了deepseek-cpu。使用cmd（命令提示符）进行创建，创建完成后可以发现"C:\Users\Lenovo"多了一个文件夹\deepseek-cpu
-
+1.首先安装Python，deepseek 官方推荐的版本在Python 3.8及以上，但经过实测，后续一些步骤需要Python ≥ 3.9，所以保险起见这里安装了3.10版本。注意不能使用过于新的版本，比如Python 3.13，因为很多库还没有适配新的版本  
+安装完之后，把Python 3.10添加到环境变量中。（下一步会创建新的虚拟环境，所以也可以不添加，但为了方便以及后续的报错排查，这里还是选择添加了）  
+2.创建一个新的虚拟环境，这里因为要使用cpu部署，所以命名为了deepseek-cpu。使用cmd（命令提示符）进行创建，创建完成后可以发现"C:\Users\Lenovo"多了一个文件夹\deepseek-cpu  
 运行该新的虚拟环境，cmd指令为
 ```cmd
 deepseek-cpu\Scripts\activate
@@ -21,7 +19,7 @@ deepseek-cpu\Scripts\activate
 
 3.安装基础依赖，在新生成的cmd对话框中，输入
 
-```cmd
+```bash
 pip install torch>=2.1.1 transformers>=4.35.0 accelerate sentencepiece
 ```   
 这是使用pip工具安装pytorch，如果未安装pip或者版本过低，可以
@@ -66,24 +64,20 @@ pip install vllm==0.3.0
 set http_proxy=
 set https_proxy=
 set ALL_PROXY=
-
+```  
+```psl
 #Windows (PowerShell)
 Remove-Item Env:http_proxy
 Remove-Item Env:https_proxy
 Remove-Item Env:ALL_PROXY
 ```
-但是我们不知道代理的具体信息，没法重新设置
-
-所以我开启了VPN后直接在hugging face 官网上下载，网址如下：
-
-https://huggingface.co/deepseek-ai/deepseek-moe-16b-chat/tree/main
-
-进来以后是这个样子：
-![image](https://github.com/user-attachments/assets/22c426e7-22cb-4f92-8402-3050d29e2728)
-
-我们点击file,下载其中的model。
-
-可以发现，因为模型很大，他分了7个分卷进行上传。我们为了轻量化，只需下载其中的
+但是我们不知道代理的具体信息，没法重新设置  
+所以我开启了VPN后直接在hugging face 官网上下载，网址如下：  
+https://huggingface.co/deepseek-ai/deepseek-moe-16b-chat/tree/main  
+进来以后是这个样子：  
+![image](https://github.com/user-attachments/assets/22c426e7-22cb-4f92-8402-3050d29e2728)  
+我们点击file,下载其中的model。  
+可以发现，因为模型很大，他分了7个分卷进行上传。我们为了轻量化，只需下载其中的  
 ```
 pytorch_model-00001-of-00007.safetensors  # 主模型分片1
 
@@ -103,7 +97,7 @@ configuration_deepseek.py                # 构造配置文件
 
 # 四、调试模型
 
-# 1.编写推理文件mini_inference.py
+## 1.编写推理文件mini_inference.py
 ```python
 
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
@@ -155,19 +149,20 @@ outputs = model.generate(**inputs, max_new_tokens=256)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 
-# 2.在deepseek-cpu中运行
+## 2.在deepseek-cpu中运行
 ```cmd
 python mini_inference.py
 ```
-提示bitsandbytes库没有正确安装或者无法识别到
+提示bitsandbytes库没有正确安装或者无法识别到  
 ![image](https://github.com/user-attachments/assets/ab376fa9-5b0a-4a82-b7d5-dc358cd99f09)
-若没有此报错，可以跳过2、3步骤
-解决方法：
-首先输入cmd指令，对原有bitsandbytes库进行卸载（如果有的话），我这里显示
+若没有此报错，可以跳过2、3步骤  
+解决方法：  
+首先输入cmd指令，对原有bitsandbytes库进行卸载（如果有的话），我这里显示  
 ![image](https://github.com/user-attachments/assets/3f78fd22-f5ca-444e-8cfb-8f03f4c9f6f1)
-说明我没有安装bitsandbytes库。所以第二步，安装预编译的Windows版bitsandbytes库,cmd指令
-
+说明我没有安装bitsandbytes库。所以第二步，安装预编译的Windows版bitsandbytes库,cmd指令  
+```cmd
 pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/download/wheels/bitsandbytes-0.41.1-py3-none-win_amd64.whl
+```
 ![image](https://github.com/user-attachments/assets/64e008c1-bab9-472d-950d-eb765aeaf052)
 安装成功！
 如果还是报错
@@ -176,7 +171,7 @@ pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/downl
 ```cmd
 pip install -U bitsandbytes
 ```
-# 3.安装必要的编译依赖
+## 3.安装必要的编译依赖
 ```cmd
 pip install setuptools wheel ninja
 ```
@@ -187,29 +182,29 @@ pip install accelerate
 ```
 ![image](https://github.com/user-attachments/assets/71e01935-0ca9-42d0-b1c4-bc05e55e4336)
 
-# 4.若仍是出现报错，例如
+## 4.若仍是出现报错，例如
 ![image](https://github.com/user-attachments/assets/fae1fe0f-44db-41ae-8e75-134912bac3a1)
 则是因为bitsandbytes 0.46.0需要pytorch 2.7.0，但torchvision 0.16.0和torchaudio 2.1.0需要pytorch 2.1.0，它们冲突了
 根据提示，解决方法是把所有的包都统一到2.3.0对应版本
 
-| **torch** | 2.3.0 | 基础版本 |
+依赖名称 | 版本 | 说明
+ ----
+ **torch** | 2.3.0 | 基础版本 
+ **torchvision** | 0.18.0 | 专为PyTorch 2.3.x设计 
+ **torchaudio** | 2.3.0 | 与PyTorch 2.3.x匹配 
+ **bitsandbytes** | 0.43.0 | 兼容PyTorch 2.3.x 
+ **transformers** | 4.40.0 | 最新稳定版 
 
-| **torchvision** | 0.18.0 | 专为PyTorch 2.3.x设计 |
-
-| **torchaudio** | 2.3.0 | 与PyTorch 2.3.x匹配 |
-
-| **bitsandbytes** | 0.43.0 | 兼容PyTorch 2.3.x |
-
-| **transformers** | 4.40.0 | 最新稳定版 |
-
-都统一到2.3.0版本后，重新执行python mini_inference.py
-这里若通过，则继续使用使用这个即可顺利完成部署。（注意把.py里面模型的地址改为自己下载到的路径）
+都统一到2.3.0版本后，重新执行python mini_inference.py  
+这里若通过，则继续使用使用这个即可顺利完成部署。（注意把.py里面模型的地址改为自己下载到的路径）  
 然而，我这里报错RuntimeError:
 ```text
-None of the available devices `available_devices = None` are supported by the bitsandbytes version you have installed: `bnb_supported_devices = {'"cpu" (needs an Intel CPU and intel_extension_for_pytorch installed and compatible with the PyTorch version)', 'hpu', 'cuda', 'mps', 'xpu', 'npu'}`. Please check the docs to see if the backend you intend to use is available and how to install it:
+None of the available devices `available_devices = None` are supported by the bitsandbytes version you have installed:
+`bnb_supported_devices = {'"cpu" (needs an Intel CPU and intel_extension_for_pytorch installed and compatible with the PyTorch version)',
+'hpu', 'cuda', 'mps', 'xpu', 'npu'}`. Please check the docs to see if the backend you intend to use is available and how to install it:
 https://huggingface.co/docs/bitsandbytes/main/en/installation#multi-backend
 ```
-这个报错意思是，bitsandbytes 在 Windows 上默认不支持 CPU 推理，需要 Intel CPU 和特定扩展。
+这个报错意思是，bitsandbytes 在 Windows 上默认不支持 CPU 推理，需要 Intel CPU 和特定扩展。  
 可能的解决方法是，使用 CPU 优化的替代库
 ```cmd
 pip uninstall bitsandbytes -y
@@ -217,12 +212,9 @@ pip install intel-extension-for-pytorch
 pip install transformers[torch] accelerate
 ```
 也就是安装intel-extension-for-pytorch优化，以达到支持的性能。
-
-# 5.根据安装intel优化是否成功，分为两种情况：
-
-# （1）安装成功
+## 5.根据安装intel优化是否成功，分为两种情况：
+### （1）安装成功
 此时原来下载的模型可以继续使用，但需要修改推理文件，把bitsandbytes量化改为Intel优化：
-
 ```python
 #cpu_inference.py
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -253,8 +245,7 @@ with torch.no_grad():
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
 并注意把.py里面模型的地址改为自己下载到的路径
-
-# （2）安装不成功
+### （2）安装不成功
 像我这里，报错“找不到合适的版本”，说明cpu达不到intel优化包所需的要求
 只能改用 GGUF 格式的模型 DeepSeek-MoE-16b-chat GGUF
 deepseek的hugging face官方发布界面上这一模型暂时处于404-找不到的状态，我是从这里下载的
