@@ -12,36 +12,41 @@
 2.创建一个新的虚拟环境，这里因为要使用cpu部署，所以命名为了deepseek-cpu。使用cmd（命令提示符）进行创建，创建完成后可以发现"C:\Users\Lenovo"多了一个文件夹\deepseek-cpu
 
 运行该新的虚拟环境，cmd指令为
-'''bash
+```cmd
 deepseek-cpu\Scripts\activate
-'''
+```
 成功进入后，cmd显示
 
-'(deepseek-cpu) C:\Users\Lenovo>'
+`(deepseek-cpu) C:\Users\Lenovo>`
 
 3.安装基础依赖，在新生成的cmd对话框中，输入
 
-'pip install torch>=2.1.1 transformers>=4.35.0 accelerate sentencepiece'
-
-这是使用pip工具安装pytorch，如果未安装pip或者版本过低，可以install --uograde pip
+```cmd
+pip install torch>=2.1.1 transformers>=4.35.0 accelerate sentencepiece
+```   
+这是使用pip工具安装pytorch，如果未安装pip或者版本过低，可以
+`install --uograde pip`
 
 torch包很大，需要长时间的下载
 
 这一步可能会产生报错，但只要torch下载完成就不影响。比如在transformers处报错，可以在cmd执行
 
-'pip install --uograde transformers'
+```cmd
+pip install --uograde transformers
+```
 
 某次尝试时这里没有报错，但后续步骤中会有提示“找不到transformers”，所以这里还是install一下transformers比较好
 
 4.为了实现GPU加速推理，继续cmd执行
 
-'pip install vllm==0.3.0'
-
+```cmd
+pip install vllm==0.3.0
+```
 等待进度条跑完，可能第二个进度条会报错error，但只要第一个进度条跑完是done就可以
 
 5.为了实现CPU部署，继续cmd执行
 
-'pip install llama-cpp-python'
+`pip install llama-cpp-python`
 
 等待进度条跑完，上一步的进度条即使有报错wheel（轮子）没有构建成功，这一步的进度条也会把wheel构建完成（done）
 
@@ -50,14 +55,13 @@ torch包很大，需要长时间的下载
 
 即使这时打开VPN，cmd也会报错
 
-'InvalidSchema: missing dependencies for socks support'
+`InvalidSchema: missing dependencies for socks support`
 
 解决方案一是安装缺少的socks依赖，但是会报错
-
-'ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.'
+`ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.`
 
 解决方案二是清除代理设置
-'''
+```cmd
 #Windows (CMD)
 set http_proxy=
 set https_proxy=
@@ -67,7 +71,7 @@ set ALL_PROXY=
 Remove-Item Env:http_proxy
 Remove-Item Env:https_proxy
 Remove-Item Env:ALL_PROXY
-'''
+```
 但是我们不知道代理的具体信息，没法重新设置
 
 所以我开启了VPN后直接在hugging face 官网上下载，网址如下：
@@ -80,7 +84,7 @@ https://huggingface.co/deepseek-ai/deepseek-moe-16b-chat/tree/main
 我们点击file,下载其中的model。
 
 可以发现，因为模型很大，他分了7个分卷进行上传。我们为了轻量化，只需下载其中的
-
+```
 pytorch_model-00001-of-00007.safetensors  # 主模型分片1
 
 pytorch_model-00002-of-00007.safetensors  # 主模型分片2
@@ -92,7 +96,7 @@ config.json                              # 模型配置
 modeling_deepseek.py                     # 模型组装
 
 configuration_deepseek.py                # 构造配置文件
-
+```
 即可。为什么可以省略其他文件？
 
 其他分片包含的是模型的不同层，量化时会自动重建结构，只需要部分分片即可开始处理。
@@ -100,72 +104,46 @@ configuration_deepseek.py                # 构造配置文件
 # 四、调试模型
 
 # 1.编写推理文件mini_inference.py
-'''python
-# 依赖
+```python
+
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import torch
 #量化配置
 quant_config = BitsAndBytesConfig(
     load_in_4bit=True,
-    
     bnb_4bit_quant_type="nf4",
-    
     bnb_4bit_compute_dtype=torch.float16
-    
 )
 
 #加载本地模型（自动处理缺失分片）
-
 model = AutoModelForCausalLM.from_pretrained(
-
     "./deepseek-moe-16b",
-    
     quantization_config=quant_config,
-    
     device_map="auto",
-    
     local_files_only=True,
-    
     trust_remote_code=True
-    
 )
 
 tokenizer = AutoTokenizer.from_pretrained("./deepseek-moe-16b")
 
 #操作系统领域问答
-
 question = "解释Linux中的进程调度算法CFS"
-
 inputs = tokenizer(question, return_tensors="pt").to(model.device)
-
 outputs = model.generate(**inputs, max_new_tokens=256)
-
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-
 quant_config = BitsAndBytesConfig(
-
     load_in_4bit=True,
-    
     bnb_4bit_quant_type="nf4",
-    
     bnb_4bit_compute_dtype=torch.float16
-    
 )
 
 #加载本地模型（自动处理缺失分片）
-
 model = AutoModelForCausalLM.from_pretrained(
-
     "./deepseek-moe-16b",
-    
     quantization_config=quant_config,
-    
     device_map="auto",
-    
     local_files_only=True,
-    
     trust_remote_code=True
-    
 )
 
 tokenizer = AutoTokenizer.from_pretrained("./deepseek-moe-16b")
@@ -175,12 +153,12 @@ question = "解释Linux中的进程调度算法CFS"
 inputs = tokenizer(question, return_tensors="pt").to(model.device)
 outputs = model.generate(**inputs, max_new_tokens=256)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-\'\'\'
+```
 
 # 2.在deepseek-cpu中运行
-
+```cmd
 python mini_inference.py
-
+```
 提示bitsandbytes库没有正确安装或者无法识别到
 ![image](https://github.com/user-attachments/assets/ab376fa9-5b0a-4a82-b7d5-dc358cd99f09)
 若没有此报错，可以跳过2、3步骤
@@ -195,15 +173,18 @@ pip install https://github.com/jllllll/bitsandbytes-windows-webui/releases/downl
 如果还是报错
 ![image](https://github.com/user-attachments/assets/db81525a-2cfb-4b88-abdc-ea72a9f2f8d3)
 则根据提示升级
-
+```cmd
 pip install -U bitsandbytes
-
+```
 # 3.安装必要的编译依赖
+```cmd
 pip install setuptools wheel ninja
+```
 ![image](https://github.com/user-attachments/assets/018a25bb-324f-4218-8787-062932b4962a)
 如上，安装或更新了这个工具
-
+```cmd
 pip install accelerate
+```
 ![image](https://github.com/user-attachments/assets/71e01935-0ca9-42d0-b1c4-bc05e55e4336)
 
 # 4.若仍是出现报错，例如
@@ -224,17 +205,17 @@ pip install accelerate
 都统一到2.3.0版本后，重新执行python mini_inference.py
 这里若通过，则继续使用使用这个即可顺利完成部署。（注意把.py里面模型的地址改为自己下载到的路径）
 然而，我这里报错RuntimeError:
-
+```text
 None of the available devices `available_devices = None` are supported by the bitsandbytes version you have installed: `bnb_supported_devices = {'"cpu" (needs an Intel CPU and intel_extension_for_pytorch installed and compatible with the PyTorch version)', 'hpu', 'cuda', 'mps', 'xpu', 'npu'}`. Please check the docs to see if the backend you intend to use is available and how to install it:
 https://huggingface.co/docs/bitsandbytes/main/en/installation#multi-backend
-
+```
 这个报错意思是，bitsandbytes 在 Windows 上默认不支持 CPU 推理，需要 Intel CPU 和特定扩展。
 可能的解决方法是，使用 CPU 优化的替代库
-（cmd）
+```cmd
 pip uninstall bitsandbytes -y
 pip install intel-extension-for-pytorch
 pip install transformers[torch] accelerate
-
+```
 也就是安装intel-extension-for-pytorch优化，以达到支持的性能。
 
 # 5.根据安装intel优化是否成功，分为两种情况：
@@ -242,7 +223,7 @@ pip install transformers[torch] accelerate
 # （1）安装成功
 此时原来下载的模型可以继续使用，但需要修改推理文件，把bitsandbytes量化改为Intel优化：
 
-（python）
+```python
 #cpu_inference.py
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import intel_extension_for_pytorch as ipex
@@ -270,7 +251,7 @@ with torch.no_grad():
     outputs = model.generate(**inputs, max_new_tokens=200)
     
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
-
+```
 并注意把.py里面模型的地址改为自己下载到的路径
 
 # （2）安装不成功
@@ -286,7 +267,7 @@ https://huggingface.co/mradermacher/deepseek-moe-16b-chat-i1-GGUF
 
 最后，修改配套的推理脚本（为了区分上面的Intel CPU模式，命名为gguf_inference.py）
 
-（python）
+```python
 #gguf_inference.py
 from llama_cpp import Llama
 import time
@@ -361,7 +342,7 @@ while True:
         break
     answer = ask_os_expert(user_input)
     print(f"\n专家回答: {answer}")
-
+```
 把模型加载的路径换成自己下载到的路径，然后cmd执行命令 python gguf_inference.py
 # 五、测试结果
 ![测试结果1](https://github.com/user-attachments/assets/eed6907a-10ee-4f71-b9d8-828642e70525)
