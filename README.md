@@ -39,7 +39,7 @@ pip install vllm==0.3.0
 # 5.为了实现CPU部署
 继续在cmd执行
 ```cmd
-pip install llama-cpp-python`
+pip install llama-cpp-python
 ```
 等待进度条跑完，上一步的进度条即使有报错wheel（轮子）没有构建成功，这一步的进度条也会把wheel构建完成（done）
 # 三、下载模型
@@ -178,7 +178,7 @@ pip install accelerate
 根据提示，解决方法是把所有的包都统一到2.3.0对应版本
 
 依赖名称 | 版本 | 说明
- ----
+ ---- \ ----- \ ------
  **torch** | 2.3.0 | 基础版本 
  **torchvision** | 0.18.0 | 专为PyTorch 2.3.x设计 
  **torchaudio** | 2.3.0 | 与PyTorch 2.3.x匹配 
@@ -188,7 +188,7 @@ pip install accelerate
 都统一到2.3.0版本后，重新执行python mini_inference.py  
 这里若通过，则继续使用使用这个即可顺利完成部署。（注意把.py里面模型的地址改为自己下载到的路径）  
 然而，我这里报错RuntimeError:
-```text
+```cmd
 None of the available devices `available_devices = None` are supported by the bitsandbytes version you have installed:
 `bnb_supported_devices = {'"cpu" (needs an Intel CPU and intel_extension_for_pytorch installed and compatible with the PyTorch version)',
 'hpu', 'cuda', 'mps', 'xpu', 'npu'}`. Please check the docs to see if the backend you intend to use is available and how to install it:
